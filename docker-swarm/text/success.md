@@ -14,4 +14,4 @@ ${globals.worker-token} \
 ${nodes.cp.master.intIP}:2377
 ```
 
-**Note:** The above-specified strings are suitable to connect nodes hosted inside the same platform. To include external swarm members, replace the last line with the master node [endpoint](https://docs.jelastic.com/endpoints).
+**Note:** The above-specified strings are suitable to connect nodes hosted inside the same platform. For adding external swarm members, replace the last line with the master node [Endpoint](https://docs.jelastic.com/endpoints) or [Public IP](https://docs.jelastic.com/public-ip).
