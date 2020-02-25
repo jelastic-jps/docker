@@ -89,6 +89,6 @@ actions:
           _customDomains: ${env.domain}
 
 success: |
-  **Portainer UI**: [https://${env.domain}](https://${env.domain})
+  **Portainer UI**: [https://${env.domain}](https://${env.domain})  
   **User**: ${globals.user}  
   **Password**: ${globals.password}  
