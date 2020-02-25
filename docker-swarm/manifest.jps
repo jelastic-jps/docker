@@ -96,8 +96,8 @@ onInstall:
   - portainer
   - get-tokens
 
-onBeforeClone: stopEvent
-onBeforeMigrate: stopEvent
+#onBeforeClone: stopEvent
+#onBeforeMigrate: stopEvent
   
 actions:
   deploy:
