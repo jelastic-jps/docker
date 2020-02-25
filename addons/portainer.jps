@@ -56,7 +56,6 @@ actions:
       openssl req -new -x509 -sha256 -key ${globals.CERTS}/portainer.key -out ~/.ssh/certs/portainer.crt -days 3650 -subj "/CN=${env.domain}"
 
   install-LE:
-    - add-port-forwarding
     - cmd[cp]: |-
         dir=${globals.CERTS}/../certs_ss
         [ ! -d "${dir}" ] && { mkdir -p ${dir}; yes | cp ${globals.CERTS}/* ${dir}; }
@@ -93,6 +92,6 @@ actions:
         service iptables save
 
 success: |
-  **Portainer UI**: [https://${env.domain}](https://${env.domain})  
+  **Portainer UI**: [https://${env.domain}:4848/](https://${env.domain}:4848/)  
   **User**: ${globals.user}  
   **Password**: ${globals.password}  
