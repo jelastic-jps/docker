@@ -7,7 +7,7 @@ description:
 categories:
   - apps/dev-and-admin-tools
 
-logo: ../images/docker-engine-logo-94x70.png
+logo: ../images/docker-engine-logo-2.png
 name: Docker Engine CE
 targetRegions:
   type: vz7
@@ -65,7 +65,7 @@ settings:
       clean:
       - name: portainer
         type: checkbox
-        caption: Install <a href='https://portainer.io' target='_blank'>Portainer UI</a> - lightweight container management
+        caption: Install <a href='https://portainer.io' target='_blank'>Portainer UI</a> and Let's Encrypt SSL certificates
         value: false
       - name: role
         type: string
