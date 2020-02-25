@@ -126,7 +126,7 @@ actions:
           settings:
             mode: engine
       - setGlobals:
-          startPage: https://${env.domain}:4848/
+          startPage: https://${env.domain}/
 
   addExtIp:
     if ('${settings.role}' == 'cp'):
