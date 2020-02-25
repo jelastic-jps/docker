@@ -1,4 +1,4 @@
-![Docker Engine Logo](images/docker-engine-logo.png) 
+![Docker Engine Logo](images/docker-engine-logo-2-130.png) 
 
 ## Native Docker Containers
 
