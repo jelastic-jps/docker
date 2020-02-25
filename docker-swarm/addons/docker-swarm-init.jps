@@ -72,7 +72,7 @@ onBeforeClone:
   - if (${settings.clone:false}):
       stopEvent:
         type: warning
-        message: Second level of cloning is not supported yet. Please contact <a href="mailto:support@jelastic.com">support@jelastic.com</a> if you want to increse priority for this feature. 
+        message: Second level of cloning is not supported yet. Please contact **support@jelastic.com** if you want to increse priority for this feature. 
     
 onAfterClone:
   - if (!${settings.clone:false}):
