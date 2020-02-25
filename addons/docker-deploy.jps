@@ -1,0 +1,54 @@
+jpsType: update
+id: docker-deploy
+name: Docker Deploy
+globals:
+  log: /var/log/run.log
+onInstall:
+  - if ("${settings.preHook}" && "${settings.preHook}" != "$"+"{settings.preHook}"): execPreHook
+  - if ('${settings.type}' == 'stack'): stackDeploy
+  - if ('${settings.type}' == 'stackName'): stackNameDeploy
+  - if ('${settings.type}' == 'compose'): composeUp
+actions:
+  execPreHook: 
+    cmd[${nodes.cp.master.id}]: ${settings.preHook}
+   
+  stackNameDeploy:
+    - script: |-       
+        var url = "${settings.yml}".replace('blob/', '').replace("raw.githubusercontent.com", "github.com").split('/'),
+          file = url[url.length-1],
+          repo = url.splice(0,5).join('/'),
+          path;
+        path = url.splice(1);
+        path.pop();
+        path = path.join("/");
+        return {result: 0, repo: repo, path: path, file: file}
+        if (repo.indexOf(".git") == -1) repo += ".git";
+        return {result: 0, repo: repo, path: path, file: file}
+    - cmd[${nodes.cp.master.id}]: |-
+        git clone ${response.repo} application >> ${globals.log}
+        cd application/${response.path} && docker stack deploy -c ${response.file} ${settings.stackName} >> ${globals.log}
+  stackDeploy:
+    cmd[${nodes.cp.master.id}]: |-
+      docker network create --driver overlay proxy
+      curl -o docker-stack.yml ${settings.yml} >> ${globals.log}
+      docker stack deploy -c docker-stack.yml proxy >> ${globals.log}
+  serviceDeploy:
+    cmd[${nodes.cp.master.id}]: |-
+      docker service create --name demo --replicas $NBR_REPLICA --publish ${EXPOSED_PORT}:${SERVICE_PORT} ${SERVICE_IMAGE} >> ${globals.log}
+  composeUp:
+    - script: |-
+        var url = "${settings.repo}".replace('blob/', '').replace("raw.githubusercontent.com", "github.com").split('/'),
+            repo = url.splice(0,5).join('/'),
+            path;
+        path = url.splice(1);
+        path.pop();
+        path = path.join("/");
+        if (repo.indexOf(".git") == -1) repo += ".git";
+        return {result: 0, repo: repo, path: path}
+    - cmd[cp]: |-
+        git clone ${response.repo} application >> ${globals.log}
+        cd application/${response.path} && docker-compose up -d >> ${globals.log}
+responses:
+  4109:
+    type: error
+    message: 'Deployment failed: please check _${globals.log}_ inside the node for more details.'

@@ -1,0 +1,141 @@
+type: install
+id: docker-swarm-ce
+baseUrl: https://raw.githubusercontent.com/sych74/docker-native/master/docker-swarm
+description:
+  text: /text/description.md
+  short: Docker Swarm Cluster with out-of-box auto-clustering and auto-scaling
+categories:
+  - apps/clusters
+  - apps/dev-and-admin-tools
+logo: ../images/docker-swarm-logo-89x70.png
+name: Docker Swarm Cluster
+targetRegions:
+  type: vz7
+
+globals:
+  startPage: http://${env.domain}/
+
+settings: 
+  fields:  
+  - type: nodetags      
+    nodeType: dockerengine
+    caption: Docker Version
+    name: tag  
+    width: 100
+  - type: spinner
+    name: mngr
+    caption: Manager Nodes
+    min: 1
+    max: 5
+    default: 1
+    increment: 2
+  - type: spinner
+    name: worker
+    caption: Worker Nodes
+    min: 1
+    max: 10
+    default: 1
+    
+  - name: stack
+    type: radio-fieldset
+    values:
+      clean: Clean Cluster
+      deploy: Deploy Stack YML
+    default: clean
+    showIf:
+      deploy:
+        - name: yml
+          type: string
+          caption: Stack YML URL
+          default: https://github.com/jelastic/example-voting-app/blob/master/docker-stack.yml
+          required: true
+          vtype: url
+        - name: stackName
+          type: string
+          caption: Stack Name
+          default: example
+          required: true
+        - name: preHook
+          type: string
+          caption: Pre Hook
+          inputType: hidden
+
+      clean:
+        name: portainer
+        type: checkbox
+        caption: Install <a href='https://portainer.io' target='_blank'>Portainer UI</a> - lightweight container management
+        value: false
+
+nodes:
+  - count: ${settings.mngr}
+    cloudlets: 32
+    nodeType: dockerengine
+    tag: ${settings.tag}
+    nodeGroup: cp
+    displayName: Manager
+    startServiceOnCreation: false
+    env:
+      JELASTIC_EXPOSE: false
+    
+  - count: ${settings.worker}
+    nodeGroup: worker
+    nodeType: dockerengine
+    tag: ${settings.tag}
+    displayName: Worker
+    startServiceOnCreation: false
+    cloudlets: 32
+    env:
+      JELASTIC_EXPOSE: false
+
+skipNodeEmails: true
+ 
+onInstall:
+  - addExtIp
+  - install: /addons/docker-swarm-init.jps?_r=${fn.random}
+  - if ('${settings.stack}' == 'deploy'): deploy
+  - portainer
+  - get-tokens
+
+onBeforeClone: stopEvent
+onBeforeMigrate: stopEvent
+  
+actions:
+  deploy:
+    - install:
+        jps: ../addons/docker-deploy.jps?_r=${fn.random}
+        settings:
+          yml: ${settings.yml}
+          stackName: ${settings.stackName}
+          type: stackName
+          preHook: ${settings.preHook}
+ 
+    - if ('${settings.yml}'.indexOf('/openfaas/') > -1):
+        setGlobals:
+          startPage: http://${env.domain}:8080/
+
+    - if ('${settings.yml}'.indexOf('/example-voting-app/') > -1):
+        setGlobals:
+          startPage: http://${env.domain}:5000/
+
+  portainer:
+    if ('${settings.portainer}' == 'true'):
+      - install:
+          jps: ../addons/portainer.jps?_r=${fn.random}
+          settings:
+            mode: swarm
+      - setGlobals:
+          startPage: https://${env.domain}:4848/
+
+  addExtIp:
+    script: ../addons/scripts/attach-external-ip.js?_r=${fn.random}
+
+  get-tokens: 
+    - cmd[${nodes.cp.master.id}]: docker swarm join-token -q manager
+    - setGlobals:
+        manager-token: ${response.out}        
+    - cmd[${nodes.cp.master.id}]: docker swarm join-token -q worker
+    - setGlobals:
+        worker-token: ${response.out}
+
+startPage: ${globals.startPage}      
+success: /text/success.md

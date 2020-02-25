@@ -1,0 +1,1 @@
+This package provides standalone Docker Engine. You can use it for performing *docker build*, *docker run*, *docker-compose up* and *docker swarm join*. For using *docker swarm* and *docker stack* please review [dedicated package](https://github.com/jelastic-jps/docker-native/tree/master/docker-swarm) of Docker Swarm cluster.
