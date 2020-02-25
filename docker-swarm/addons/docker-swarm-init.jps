@@ -68,8 +68,15 @@ onInstall:
 #					 ids: cp,worker  
 #          act: D
 
+onBeforeClone:
+  - if (${settings.clone:false}):
+      stopEvent:
+        type: warning
+        message: Second level of cloning is not supported yet. Please contact <a href="mailto:support@jelastic.com">support@jelastic.com</a> if you want to increse priority for this feature. 
+    
 onAfterClone:
-  re-init-swarm: ${event.response.env.envName}
+  - if (!${settings.clone:false}):
+      re-init-swarm: ${event.response.env.envName}
 
 onAfterMigrate:
   re-init-swarm: ${event.response.env.envName}
