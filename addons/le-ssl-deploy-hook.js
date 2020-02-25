@@ -8,5 +8,5 @@ customDomains = (getParam('customDomains') || "").replace(/^\s+|\s+$/gm , "").sp
 domain = customDomains || envDomain;
 
 //executing custom deployment hook script on master node
-resp = jelastic.env.control.ExecCmdById(envName, session, getParam('nodeId'), toJSON([{ command:'cd gitlab && docker-compose up -d && cd .. && /bin/bash ' + scriptName}]), true);
+resp = jelastic.env.control.ExecCmdById(envName, session, getParam('nodeId'), toJSON([{ command:'/bin/bash ' + scriptName}]), true);
 return resp;
