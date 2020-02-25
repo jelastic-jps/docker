@@ -1,6 +1,6 @@
 type: install
 id: docker-swarm-ce
-baseUrl: https://raw.githubusercontent.com/sych74/docker-native/master/docker-swarm
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/docker/master/docker-swarm
 description:
   text: /text/description.md
   short: Docker Swarm Cluster with out-of-box auto-clustering and auto-scaling
