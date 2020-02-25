@@ -63,7 +63,7 @@ settings:
       clean:
         name: portainer
         type: checkbox
-        caption: Install <a href='https://portainer.io' target='_blank'>Portainer UI</a> - lightweight container management
+        caption: Install <a href='https://portainer.io' target='_blank'>Portainer UI</a> and Let's Encrypt SSL certificates
         value: false
 
 nodes:
