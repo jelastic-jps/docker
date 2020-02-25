@@ -47,9 +47,6 @@ onAfterScaleOut[cp]:
     prepareManager:
       id: ${@i.id}
 
-onAfterClone:
-  add-port-forwarding
-
 actions:
   prepareManager:
     cmd[${this.id}]: |-
@@ -69,6 +66,8 @@ actions:
         wget https://letsencrypt.org/certs/fakelerootx1.pem -O ${globals.CERTS}/ca.crt
         yes | cp -f /var/lib/jelastic/keys/fullchain.pem ${globals.CERTS}/portainer.crt
         yes | cp -f /var/lib/jelastic/keys/privkey.pem ${globals.CERTS}/portainer.key
+        iptables -t nat -I PREROUTING -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 4848
+        service iptables save
         service docker restart' > ${globals.DEPLOY_HOOK}
 
         printf '#!/bin/bash
