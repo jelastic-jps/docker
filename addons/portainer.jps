@@ -46,7 +46,10 @@ onAfterScaleOut[cp]:
   forEach(event.response.nodes):
     prepareManager:
       id: ${@i.id}
-      
+
+onAfterClone:
+  add-port-forwarding
+
 actions:
   prepareManager:
     cmd[${this.id}]: |-
@@ -56,10 +59,7 @@ actions:
       openssl req -new -x509 -sha256 -key ${globals.CERTS}/portainer.key -out ~/.ssh/certs/portainer.crt -days 3650 -subj "/CN=${env.domain}"
 
   install-LE:
-    - cmd[cp]: |-
-        iptables -t nat -I PREROUTING -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 4848
-        service iptables save
-
+    - add-port-forwarding
     - cmd[cp]: |-
         dir=${globals.CERTS}/../certs_ss
         [ ! -d "${dir}" ] && { mkdir -p ${dir}; yes | cp ${globals.CERTS}/* ${dir}; }
@@ -87,6 +87,11 @@ actions:
           undeployHook: ${globals.DEPLOY_HOOK_JS}
           undeployHookType: js
           _customDomains: ${env.domain}
+          
+  add-port-forwarding:
+    - cmd[cp]: |-
+        iptables -t nat -I PREROUTING -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 4848
+        service iptables save
 
 success: |
   **Portainer UI**: [https://${env.domain}](https://${env.domain})  
