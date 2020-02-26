@@ -21,34 +21,33 @@ globals:
   DEPLOY_HOOK_JS: https://raw.githubusercontent.com/jelastic-jps/docker/master/addons/le-ssl-deploy-hook.js?_r=${fn.random}    
   
 onInstall:
-  - forEach(nodes.cp):
-      prepareManager:
-        id: ${@i.id}
+  - generateKeys: ${nodes.cp.master.id}
   - if ('${settings.mode}' == 'engine'):
       cmd[${nodes.cp.master.id}]: |-
         password=$(htpasswd -nb -B ${globals.user} ${globals.password} | cut -d ":" -f 2)
         home=$(readlink -f ~)
+        mkdir -p /opt/portainer
         volumes="-v /var/run/docker.sock:/var/run/docker.sock -v /opt/portainer:/data -v $home/.ssh/certs:/certs"
         portainer="portainer/portainer --admin-password $password --ssl --sslcert /certs/portainer.crt --sslkey /certs/portainer.key"
         docker run -d -p 4848:9000 --restart always $volumes $portainer
-  - if ('${settings.mode}' == 'swarm'):
-    - cmd[cp]: mkdir -p /opt/portainer
-    - cmd[${nodes.cp.master.id}]: |-
+  - elif ('${settings.mode}' == 'swarm'):
+      cmd[${nodes.cp.master.id}]: |-
         password=$(htpasswd -nb -B ${globals.user} ${globals.password} | cut -d ":" -f 2)
         home=$(readlink -f ~)
         mkdir -p /opt/portainer
+        docker node update --label-add master=true ${nodes.cp.master.id}-${env.envName}
         mount="--mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock --mount type=bind,src=/opt/portainer,dst=/data --mount type=bind,src=$home/.ssh/certs,dst=/certs"
         portainer="portainer/portainer -H unix:///var/run/docker.sock --admin-password $password --ssl --sslcert /certs/portainer.crt --sslkey /certs/portainer.key"
-        docker service create --name portainer -p 4848:9000 --replicas=1 --constraint 'node.role == manager' $mount $portainer
+        docker service create --name portainer -p 4848:9000 --replicas=1 --constraint node.role==manager --constraint node.labels.master==true $mount $portainer
   - install-LE
+  - if (nodes.cp.length > 1):
+      add-nat-forwarding: ${nodes.cp.join(id,)}
 
 onAfterScaleOut[cp]:
-  forEach(event.response.nodes):
-    prepareManager:
-      id: ${@i.id}
+  add-nat-forwarding: ${event.response.nodes.join(id,)}
 
 actions:
-  prepareManager:
+  generateKeys:
     cmd[${this.id}]: |-
       mkdir -p /opt/portainer ${globals.CERTS}
       openssl genrsa -out ${globals.CERTS}/portainer.key 2048
@@ -56,7 +55,7 @@ actions:
       openssl req -new -x509 -sha256 -key ${globals.CERTS}/portainer.key -out ~/.ssh/certs/portainer.crt -days 3650 -subj "/CN=${env.domain}"
 
   install-LE:
-    - cmd[cp]: |-
+    - cmd[${nodes.cp.master.id}]: |-
         dir=${globals.CERTS}/../certs_ss
         [ ! -d "${dir}" ] && { mkdir -p ${dir}; yes | cp ${globals.CERTS}/* ${dir}; }
         printf '#!/bin/bash
@@ -86,6 +85,15 @@ actions:
           undeployHookType: js
           _customDomains: ${env.domain}
           
+  add-nat-forwarding:
+    cmd[${this}]: |-    
+      [[ $HOSTNAME != $MASTER_HOST* ]] && {
+        iptables -t nat -I PREROUTING -p tcp --dport 4848 -j DNAT --to-destination ${nodes.cp.master.intIP}:4848 
+        iptables -I FORWARD -p tcp -j ACCEPT
+        iptables -t nat -I POSTROUTING -d ${nodes.cp.master.intIP} -j MASQUERADE
+        service iptables save
+      } || echo "skip master node";
+      
   add-port-forwarding:
     - cmd[cp]: |-
         iptables -t nat -I PREROUTING -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 4848
