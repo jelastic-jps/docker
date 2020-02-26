@@ -29,7 +29,7 @@ onInstall:
         mkdir -p /opt/portainer
         volumes="-v /var/run/docker.sock:/var/run/docker.sock -v /opt/portainer:/data -v $home/.ssh/certs:/certs"
         portainer="portainer/portainer --admin-password $password --ssl --sslcert /certs/portainer.crt --sslkey /certs/portainer.key"
-        docker run -d -p 4848:9000 --restart always $volumes $portainer
+        docker run -d -p 443:9000 --restart always $volumes $portainer
   - elif ('${settings.mode}' == 'swarm'):
       cmd[${nodes.cp.master.id}]: |-
         password=$(htpasswd -nb -B ${globals.user} ${globals.password} | cut -d ":" -f 2)
@@ -38,7 +38,7 @@ onInstall:
         docker node update --label-add master=true ${nodes.cp.master.id}-${env.envName}
         mount="--mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock --mount type=bind,src=/opt/portainer,dst=/data --mount type=bind,src=$home/.ssh/certs,dst=/certs"
         portainer="portainer/portainer -H unix:///var/run/docker.sock --admin-password $password --ssl --sslcert /certs/portainer.crt --sslkey /certs/portainer.key"
-        docker service create --name portainer -p 4848:9000 --replicas=1 --constraint node.role==manager --constraint node.labels.master==true $mount $portainer
+        docker service create --name portainer -p 443:9000 --replicas=1 --constraint node.role==manager --constraint node.labels.master==true $mount $portainer
   - install-LE
   - if (nodes.cp.length > 1):
       add-nat-forwarding: ${nodes.cp.join(id,)}
@@ -48,7 +48,7 @@ onAfterScaleOut[cp]:
 
 actions:
   generateKeys:
-    cmd[${this.id}]: |-
+    cmd[${this}]: |-
       mkdir -p /opt/portainer ${globals.CERTS}
       openssl genrsa -out ${globals.CERTS}/portainer.key 2048
       openssl ecparam -genkey -name secp384r1 -out ${globals.CERTS}/portainer.key
@@ -64,15 +64,15 @@ actions:
         wget https://letsencrypt.org/certs/fakelerootx1.pem -O ${globals.CERTS}/ca.crt
         yes | cp -f /var/lib/jelastic/keys/fullchain.pem ${globals.CERTS}/portainer.crt
         yes | cp -f /var/lib/jelastic/keys/privkey.pem ${globals.CERTS}/portainer.key
-        iptables -t nat -I PREROUTING -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 4848
-        service iptables save
+        #iptables -t nat -I PREROUTING -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 4848
+        #service iptables save
         service docker restart' > ${globals.DEPLOY_HOOK}
 
         printf '#!/bin/bash
         mkdir -p $(dirname ${globals.UNDEPLOY_HOOK})
         yes | cp -f ${dir}/* ${globals.CERTS}
-        iptables -t nat -D PREROUTING -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 4848
-        service iptables save
+        #iptables -t nat -D PREROUTING -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 4848
+        #service iptables save
         service docker restart' > ${globals.UNDEPLOY_HOOK}
 
     - install:
@@ -88,18 +88,14 @@ actions:
   add-nat-forwarding:
     cmd[${this}]: |-    
       [[ $HOSTNAME != $MASTER_HOST* ]] && {
-        iptables -t nat -I PREROUTING -p tcp --dport 4848 -j DNAT --to-destination ${nodes.cp.master.intIP}:4848 
+        iptables -t nat -I PREROUTING -p tcp --dport 443 -j DNAT --to-destination ${nodes.cp.master.intIP}:443 
         iptables -I FORWARD -p tcp -j ACCEPT
         iptables -t nat -I POSTROUTING -d ${nodes.cp.master.intIP} -j MASQUERADE
         service iptables save
       } || echo "skip master node";
       
-  add-port-forwarding:
-    - cmd[cp]: |-
-        iptables -t nat -I PREROUTING -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 4848
-        service iptables save
 
 success: |
-  **Portainer UI**: [https://${env.domain}:4848/](https://${env.domain}:4848/)  
+  **Portainer UI**: [https://${env.domain}/](https://${env.domain}/)  
   **User**: ${globals.user}  
   **Password**: ${globals.password}  
