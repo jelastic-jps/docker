@@ -1,6 +1,5 @@
 envName = getParam('envName');
 envDomain = getParam('envDomain');
-httpsPort =  getParam('action') == 'uninstall' ? 4848 : 443;
 scriptName = getParam('action') == 'uninstall' ? 'undeployLE.sh' : 'deployLE.sh';
 
 //getting first custom domain
