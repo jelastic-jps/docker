@@ -51,7 +51,7 @@ onAfterScaleOut[cp]:
   add-nat-forwarding: 
     ids: ${event.response.nodes.join(id,)}
     act: -I
-    port:  ${globals.port}
+    port: ${globals.port}
 
 actions:
   generateKeys:
