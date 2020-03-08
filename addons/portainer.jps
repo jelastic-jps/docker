@@ -39,22 +39,13 @@ onInstall:
         mount="--mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock --mount type=bind,src=/opt/portainer,dst=/data --mount type=bind,src=$home/.ssh/certs,dst=/certs"
         portainer="portainer/portainer -H unix:///var/run/docker.sock --admin-password $password --ssl --sslcert /certs/portainer.crt --sslkey /certs/portainer.key"
         docker service create --name portainer -p 443:9000 --replicas=1 --constraint node.role==manager --constraint node.labels.master==true $mount $portainer
-  - if (nodes.cp.length > 1):
-      add-nat-forwarding: 
-        ids: ${nodes.cp.join(id,)}
-        act: -I
-        port: 80  
-  - install-LE
-  - if (nodes.cp.length > 1):
-      - add-nat-forwarding: 
-          ids: ${nodes.cp.join(id,)}
-          act: -D
-          port: 80  
-      - add-nat-forwarding: 
-          ids: ${nodes.cp.join(id,)}
-          act: -I
-          port: 443
 
+  - script: |
+      resp = jelastic.billing.account.GetQuotas(appid, session, ['environment.externalip.enabled', 'environment.externalip.maxcount', 'environment.externalip.maxcount.per.node'].join(";"))
+      if (resp.result != 0) return resp; 
+      if (resp.array[0].value && resp.array[1].value && resp.array[2].value) { 
+        return {result:0, onAfterReturn:install-LE}
+      } else return {result:0}
 
 onAfterScaleOut[cp]:
   add-nat-forwarding: 
@@ -69,8 +60,24 @@ actions:
       openssl genrsa -out ${globals.CERTS}/portainer.key 2048
       openssl ecparam -genkey -name secp384r1 -out ${globals.CERTS}/portainer.key
       openssl req -new -x509 -sha256 -key ${globals.CERTS}/portainer.key -out ~/.ssh/certs/portainer.crt -days 3650 -subj "/CN=${env.domain}"
-
   install-LE:
+    - if (nodes.cp.length > 1):
+        add-nat-forwarding: 
+          ids: ${nodes.cp.join(id,)}
+          act: -I
+          port: 80  
+    - install-LE-addon
+    - if (nodes.cp.length > 1):
+        - add-nat-forwarding: 
+            ids: ${nodes.cp.join(id,)}
+            act: -D
+            port: 80  
+        - add-nat-forwarding: 
+            ids: ${nodes.cp.join(id,)}
+            act: -I
+            port: 443
+
+  install-LE-addon:
     - cmd[${nodes.cp.master.id}]: |-
         dir=${globals.CERTS}/../certs_ss
         [ ! -d "${dir}" ] && { mkdir -p ${dir}; yes | cp ${globals.CERTS}/* ${dir}; }
