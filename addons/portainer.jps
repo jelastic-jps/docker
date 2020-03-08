@@ -22,6 +22,11 @@ globals:
   
 onInstall:
   - generateKeys: ${nodes.cp.master.id}
+  - script: |
+      resp = jelastic.billing.account.GetQuotas(appid, session, ['environment.externalip.enabled', 'environment.externalip.maxcount', 'environment.externalip.maxcount.per.node'].join(";"))
+      if (resp.result != 0) return resp; 
+      port = resp.array[0].value && resp.array[1].value && resp.array[2].value ? 443: 4848;
+      return {result:0, onAfterReturn:{setGlobals:{port:port}}}
   - if ('${settings.mode}' == 'engine'):
       cmd[${nodes.cp.master.id}]: |-
         password=$(htpasswd -nb -B ${globals.user} ${globals.password} | cut -d ":" -f 2)
@@ -29,7 +34,7 @@ onInstall:
         mkdir -p /opt/portainer
         volumes="-v /var/run/docker.sock:/var/run/docker.sock -v /opt/portainer:/data -v $home/.ssh/certs:/certs"
         portainer="portainer/portainer --admin-password $password --ssl --sslcert /certs/portainer.crt --sslkey /certs/portainer.key"
-        docker run -d -p 443:9000 --restart always $volumes $portainer
+        docker run -d -p ${globals.port}:9000 --restart always $volumes $portainer
   - elif ('${settings.mode}' == 'swarm'):
       cmd[${nodes.cp.master.id}]: |-
         password=$(htpasswd -nb -B ${globals.user} ${globals.password} | cut -d ":" -f 2)
@@ -38,20 +43,15 @@ onInstall:
         docker node update --label-add master=true node${nodes.cp.master.id}-${env.domain}
         mount="--mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock --mount type=bind,src=/opt/portainer,dst=/data --mount type=bind,src=$home/.ssh/certs,dst=/certs"
         portainer="portainer/portainer -H unix:///var/run/docker.sock --admin-password $password --ssl --sslcert /certs/portainer.crt --sslkey /certs/portainer.key"
-        docker service create --name portainer -p 443:9000 --replicas=1 --constraint node.role==manager --constraint node.labels.master==true $mount $portainer
-
-  - script: |
-      resp = jelastic.billing.account.GetQuotas(appid, session, ['environment.externalip.enabled', 'environment.externalip.maxcount', 'environment.externalip.maxcount.per.node'].join(";"))
-      if (resp.result != 0) return resp; 
-      if (resp.array[0].value && resp.array[1].value && resp.array[2].value) { 
-        return {result:0, onAfterReturn:install-LE}
-      } else return {result:0}
-
+        docker service create --name portainer -p  ${globals.port}:9000 --replicas=1 --constraint node.role==manager --constraint node.labels.master==true $mount $portainer
+  - if (${globals.port} == 443): 
+      install-LE
+      
 onAfterScaleOut[cp]:
   add-nat-forwarding: 
     ids: ${event.response.nodes.join(id,)}
     act: -I
-    port: 443
+    port:  ${globals.port}
 
 actions:
   generateKeys:
@@ -75,8 +75,8 @@ actions:
         - add-nat-forwarding: 
             ids: ${nodes.cp.join(id,)}
             act: -I
-            port: 443
-
+            port: ${globals.port}
+            
   install-LE-addon:
     - cmd[${nodes.cp.master.id}]: |-
         dir=${globals.CERTS}/../certs_ss
@@ -120,6 +120,6 @@ actions:
       
 
 success: |
-  **Portainer UI**: [https://${env.domain}/](https://${env.domain}/)  
+  **Portainer UI**: [https://${env.domain}:${globals.port}/](https://${env.domain}:${globals.port}/)  
   **User**: ${globals.user}  
   **Password**: ${globals.password}  
