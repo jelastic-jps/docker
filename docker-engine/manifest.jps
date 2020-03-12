@@ -1,6 +1,6 @@
 type: install
 id: docker-engine-ce
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/docker/master/docker-engine
+baseUrl: https://raw.githubusercontent.com/jelastic-jps/docker/clustering-1.1/docker-engine
 description:
   text: /text/description.md
   short: Automatic Installation of Docker Engine (CE) as a Standalone or Worker Node
