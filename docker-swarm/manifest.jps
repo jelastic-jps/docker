@@ -15,6 +15,48 @@ targetRegions:
 globals:
   startPage: http://${env.domain}/
 
+onBeforeInit: |
+
+  function err(e, text, cur, override){
+    var m = (e.quota.description || e.quota.name) + " - " + e.value + ", " + text + " - " + cur + ". ";
+    if (override) markup = m; else markup += m;
+  }
+
+  var minNodesCount = 5, 
+      minSameNodesCount = 3,
+      markup = "", cur = null, text = "used", install = true, warning = false;
+  var settings = jps.settings;
+  var fields = settings.fields;
+  var quotas = jelastic.billing.account.GetQuotas('environment.maxnodescount' + ";" + 'environment.maxsamenodescount').array;
+  for (var i = 0; i < quotas.length; i++){
+    var q = quotas[i], n = toNative(q.quota.name);
+    if (n == 'environment.maxnodescount' && q.value < minNodesCount) {
+      err(q, "required", minNodesCount, true);
+      install = false; break;
+    };
+    if (n == 'environment.maxsamenodescount' && q.value < minSameNodesCount) {
+      if (!markup) err(q, "required", minSameNodesCount, true);
+      install = false; break;
+    };
+    if (n == 'environment.maxsamenodescount' && q.value < 10) warning = true;
+  }
+  if (!install) {
+    for (var i = 0; i < fields.length; i++) fields[i].disabled = true;
+    fields[4].markup = "Topology is not available. " + markup + "Please upgrade your account.";
+    fields[4].hidden = false;
+    fields[4].disabled = false;
+    fields.push(
+      {"type": "compositefield","height": 0,"hideLabel": true,"width": 0,"items": [{"height": 0,"type": "string","required": true}]}
+    );
+  }
+  if (warning) {
+    fields[4].markup = "If the specified nodes' count exceeds the account limitations it will be automatically reduced during the creation.";
+    fields[4].hidden = false;
+    fields[4].disabled = false;
+  }  
+  
+  return { result: 0, settings: settings };
+  
 settings: 
   fields:  
   - type: nodetags      
@@ -65,6 +107,15 @@ settings:
         type: checkbox
         caption: Install <a href='https://portainer.io' target='_blank'>Portainer UI</a> and Let's Encrypt SSL certificates
         value: false
+
+  - type: displayfield
+    name: displayfield
+    cls: warning
+    height: 30
+    hideLabel: true
+    hidden: true
+    required: true
+    markup:
 
 nodes:
   - count: ${settings.mngr}
