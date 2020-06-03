@@ -22,8 +22,8 @@ onBeforeInit: |
     if (override) markup = m; else markup += m;
   }
 
-  var minNodesCount = 5, 
-      minSameNodesCount = 3,
+  var minNodesCount = 2, 
+      minSameNodesCount = 1,
       markup = "", cur = null, text = "used", install = true, warning = false;
   var settings = jps.settings;
   var fields = settings.fields;
