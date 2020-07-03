@@ -27,6 +27,7 @@ onInstall:
         password=$(htpasswd -nb -B ${globals.user} ${globals.password} | cut -d ":" -f 2)
         home=$(readlink -f ~)
         mkdir -p /opt/portainer
+        touch /.dockerenv
         volumes="-v /var/run/docker.sock:/var/run/docker.sock -v /opt/portainer:/data -v $home/.ssh/certs:/certs"
         portainer="portainer/portainer --admin-password $password --ssl --sslcert /certs/portainer.crt --sslkey /certs/portainer.key"
         docker run -d -p ${settings.port}:9000 --restart always $volumes $portainer
@@ -35,6 +36,7 @@ onInstall:
         password=$(htpasswd -nb -B ${globals.user} ${globals.password} | cut -d ":" -f 2)
         home=$(readlink -f ~)
         mkdir -p /opt/portainer
+        touch /.dockerenv
         docker node update --label-add master=true node${nodes.cp.master.id}-${env.domain}
         mount="--mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock --mount type=bind,src=/opt/portainer,dst=/data --mount type=bind,src=$home/.ssh/certs,dst=/certs"
         portainer="portainer/portainer -H unix:///var/run/docker.sock --admin-password $password --ssl --sslcert /certs/portainer.crt --sslkey /certs/portainer.key"
