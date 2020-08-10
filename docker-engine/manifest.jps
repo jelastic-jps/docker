@@ -1,5 +1,6 @@
 type: install
 id: docker-engine-ce
+version: 1.7
 baseUrl: https://raw.githubusercontent.com/jelastic-jps/docker/master/docker-engine
 description:
   text: /text/description.md
