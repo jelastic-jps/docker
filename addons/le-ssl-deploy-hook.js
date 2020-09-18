@@ -1,9 +1,10 @@
 nodeId = getParam('nodeId');
 envName = getParam('envName');
+envAppid = getParam('envAppid');
 envDomain = getParam('envDomain');
 scriptName = getParam('action') == 'uninstall' ? 'undeployLE.sh' : 'deployLE.sh';
 
-resp = jelastic.environment.control.GetNodeInfo("${env.appid}", session, nodeId);
+resp = jelastic.environment.control.GetNodeInfo(envAppid, session, nodeId);
 if (resp.result != 0) return resp;
 
 if (resp.node && resp.node.nodeGroup == "bl") return {result: 0}
