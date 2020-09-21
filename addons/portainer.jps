@@ -16,8 +16,8 @@ globals:
   user: admin
   password: ${fn.password}
   CERTS: ~/.ssh/certs
-  DEPLOY_HOOK: /var/lib/jelastic/keys/deployLE.sh
-  UNDEPLOY_HOOK: /var/lib/jelastic/keys/undeployLE.sh 
+  DEPLOY_HOOK: /var/lib/jelastic/keys/letsencrypt/deployLE.sh
+  UNDEPLOY_HOOK: /var/lib/jelastic/keys/letsencrypt/undeployLE.sh 
   DEPLOY_HOOK_JS: https://raw.githubusercontent.com/jelastic-jps/docker/master/addons/le-ssl-deploy-hook.js?_r=${fn.random}    
   
 onInstall:
@@ -76,6 +76,7 @@ actions:
     - cmd[${nodes.cp.master.id}]: |-
         dir=${globals.CERTS}/../certs_ss
         [ ! -d "${dir}" ] && { mkdir -p ${dir}; yes | cp ${globals.CERTS}/* ${dir}; }
+        mkdir -p $(dirname ${globals.DEPLOY_HOOK})
         printf '#!/bin/bash
         mkdir -p ${globals.CERTS}
         #wget https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem -O ${globals.CERTS}/ca.crt
@@ -86,6 +87,7 @@ actions:
         #service iptables save
         service docker restart' > ${globals.DEPLOY_HOOK}
 
+        mkdir -p $(dirname ${globals.UNDEPLOY_HOOK})
         printf '#!/bin/bash
         mkdir -p ${globals.CERTS}
         yes | cp -f ${dir}/* ${globals.CERTS}
