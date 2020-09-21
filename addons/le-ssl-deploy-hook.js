@@ -14,5 +14,5 @@ customDomains = (getParam('customDomains') || "").replace(/^\s+|\s+$/gm , "").sp
 domain = customDomains || envDomain;
 
 //executing custom deployment hook script on master node
-resp = jelastic.env.control.ExecCmdById(envName, session, nodeId, toJSON([{ command:'/bin/bash ' + scriptName}]), true);
+resp = jelastic.env.control.ExecCmdById(envName, session, nodeId, toJSON([{ command:'/bin/bash /var/lib/jelastic/keys/' + scriptName}]), true);
 return resp;
