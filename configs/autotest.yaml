@@ -1,0 +1,5 @@
+jps: https://github.com/ihorstep/docker/blob/master/docker-engine/manifest.jps
+component: docker-ce
+subfolder: 
+  - docker-engine
+  - docker-swarm
