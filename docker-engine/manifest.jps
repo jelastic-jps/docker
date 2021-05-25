@@ -105,10 +105,10 @@ actions:
   connect-to-swarm:
     if ('${settings.mode}' == 'swarm-join'):
     - sleep: 10000
-    - if (!event.response.nodes):
+    - if (event && event.response && !event.response.nodes):
         swarm-join:
           filter: ${settings.role}
-    - if (event.response.nodes):
+    - if (event && event.response && event.response.nodes):
         forEach(event.response.nodes):
           swarm-join:
             filter: ${@i.id}
