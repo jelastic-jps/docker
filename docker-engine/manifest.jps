@@ -112,6 +112,10 @@ actions:
         forEach(event.response.nodes):
           swarm-join:
             filter: ${@i.id}
+    - else:
+        forEach(env.nodes):
+          swarm-join:
+            filter: ${@i.id}
             
   swarm-join:
   - cmd[${this.filter}]: docker swarm join --token ${settings.token} ${settings.host}:2377
