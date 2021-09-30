@@ -27,8 +27,7 @@ actions:
     - cmd[${nodes.cp.master.id}]: |-
         git clone ${response.repo} application >> ${globals.log}
         cd application;
-        [ -d "${response.path}r" ] && { cd ${response.path}; } || { path=$(find . -name "docker-compose.yml"); cd ${path//docker-
-compose.yml}; };
+        [ -d "${response.path}" ] && { cd ${response.path}; } || { path=$(find . -name "docker-compose.yml"); cd ${path//docker-compose.yml}; };
         docker stack deploy -c ${response.file} ${settings.stackName} >> ${globals.log}
   stackDeploy:
     cmd[${nodes.cp.master.id}]: |-
