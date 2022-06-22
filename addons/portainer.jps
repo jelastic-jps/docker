@@ -38,8 +38,8 @@ onInstall:
         mkdir -p /opt/portainer
         touch /.dockerenv
         docker node update --label-add master=true node${nodes.cp.master.id}-${env.domain}
-        mount="--mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock --mount type=bind,src=/opt/portainer,dst=/data --mount type=bind,src=$home/.ssh/certs,dst=/certs"
-        portainer="portainer/portainer-ce -H unix:///var/run/docker.sock --admin-password $password --sslcert /certs/portainer.crt --sslkey /certs/portainer.key"
+        mount="--mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock --mount type=bind,src=/opt/portainer,dst=/data --mount type=bind,src=$home/.ssh/certs,dst=/data/certs"
+        portainer="portainer/portainer-ce -H unix:///var/run/docker.sock --admin-password $password --sslcert /data/certs/portainer.crt --sslkey /data/certs/portainer.key"
         docker service create --name portainer -p  ${settings.port}:9443 --replicas=1 --constraint node.role==manager --constraint node.labels.master==true $mount $portainer
   - if (${settings.port} == 443): 
       install-LE
@@ -86,6 +86,7 @@ actions:
         yes | cp -f /var/lib/jelastic/keys/fullchain.pem ${globals.CERTS}/portainer.crt
         yes | cp -f /var/lib/jelastic/keys/privkey.pem ${globals.CERTS}/portainer.key
         #iptables -t nat -I PREROUTING -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 4848
+        rm -rf ${globals.CERTS}/*.pem
         #service iptables save
         service docker restart' > ${globals.DEPLOY_HOOK}
 
