@@ -26,7 +26,9 @@ actions:
         return {result: 0, repo: repo, path: path, file: file}
     - cmd[${nodes.cp.master.id}]: |-
         git clone ${response.repo} application >> ${globals.log}
-        cd application/${response.path} && docker stack deploy -c ${response.file} ${settings.stackName} >> ${globals.log}
+        cd application;
+        [ -d "${response.path}" ] && { cd ${response.path}; } || { path=$(find . -name "docker-compose.yml"); cd ${path//docker-compose.yml}; };
+        docker stack deploy -c ${response.file} ${settings.stackName} >> ${globals.log}
   stackDeploy:
     cmd[${nodes.cp.master.id}]: |-
       docker network create --driver overlay proxy
