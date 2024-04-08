@@ -39,7 +39,7 @@ onInstall:
         mount="--mount type=bind,src=//var/run/docker.sock,dst=/var/run/docker.sock --mount type=bind,src=/opt/portainer,dst=/data --mount type=bind,src=$home/.ssh/certs,dst=/certs"
         portainer="portainer/portainer-ce -H unix:///var/run/docker.sock --admin-password $password --sslcert /certs/portainer.crt --sslkey /certs/portainer.key"
         docker service create --name portainer -p  ${settings.port}:9443 --replicas=1 --constraint node.role==manager --constraint node.labels.master==true $mount $portainer
-  - if (${settings.port} == 443): 
+  - if (${settings.port} == 443 || ${settings.port} == 4848):
       install-LE
       
 onAfterScaleOut[cp]:

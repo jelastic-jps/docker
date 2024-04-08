@@ -1,6 +1,6 @@
 type: install
 id: docker-engine-ce
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/docker/clustering-1.1/docker-engine
+baseUrl: https://raw.githubusercontent.com/dimkadt/docker/clustering-1.1/docker-engine
 description:
   text: /text/description.md
   short: Automatic Installation of Docker Engine (CE) as a Standalone or Worker Node
@@ -14,6 +14,7 @@ targetRegions:
 
 globals:                                                                                                                                                                                                                         
   startPage: http://${env.domain}/   
+  port: 4848
  
 settings: 
   fields:  
@@ -109,11 +110,11 @@ actions:
           filter: ${settings.role}
     - if (event && event.response && event.response.nodes):
         forEach(event.response.nodes):
-          swarm-join:	
-            filter: ${@i.id}	
-    - else:	
-        forEach(env.nodes):	
-          swarm-join:	
+          swarm-join:
+            filter: ${@i.id}
+    - else:
+        forEach(env.nodes):
+          swarm-join:
             filter: ${@i.id}
             
   swarm-join:
@@ -125,11 +126,11 @@ actions:
     
   portainer:
     if ('${settings.portainer}' == 'true'):
-      - script: |
-          resp = jelastic.billing.account.GetQuotas(appid, session, ['environment.externalip.enabled', 'environment.externalip.maxcount', 'environment.externalip.maxcount.per.node'].join(";"))
-          if (resp.result != 0) return resp; 
-          port = resp.array[0].value && resp.array[1].value && resp.array[2].value ? 443: 4848;
-          return {result:0, onAfterReturn:{setGlobals:{port:port}}}
+#      - script: |
+#          resp = jelastic.billing.account.GetQuotas(appid, session, ['environment.externalip.enabled', 'environment.externalip.maxcount', 'environment.externalip.maxcount.per.node'].join(";"))
+#          if (resp.result != 0) return resp; 
+#          port = resp.array[0].value && resp.array[1].value && resp.array[2].value ? 443: 4848;
+#          return {result:0, onAfterReturn:{setGlobals:{port:port}}}
       - install:
           jps: ../addons/portainer.jps?_r=${fn.random}
           settings:
