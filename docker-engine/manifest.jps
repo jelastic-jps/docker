@@ -15,6 +15,7 @@ targetRegions:
 
 globals:                                                                                                                                                                                                                         
   startPage: http://${env.domain}/   
+  port: 4848
  
 settings: 
   fields:  
@@ -126,11 +127,11 @@ actions:
     
   portainer:
     if ('${settings.portainer}' == 'true'):
-      - script: |
-          resp = jelastic.billing.account.GetQuotas(appid, session, ['environment.externalip.enabled', 'environment.externalip.maxcount', 'environment.externalip.maxcount.per.node'].join(";"))
-          if (resp.result != 0) return resp; 
-          port = resp.array[0].value && resp.array[1].value && resp.array[2].value ? 443: 4848;
-          return {result:0, onAfterReturn:{setGlobals:{port:port}}}
+#      - script: |
+#          resp = jelastic.billing.account.GetQuotas(appid, session, ['environment.externalip.enabled', 'environment.externalip.maxcount', 'environment.externalip.maxcount.per.node'].join(";"))
+#          if (resp.result != 0) return resp; 
+#          port = resp.array[0].value && resp.array[1].value && resp.array[2].value ? 443: 4848;
+#          return {result:0, onAfterReturn:{setGlobals:{port:port}}}
       - install:
           jps: ../addons/portainer.jps?_r=${fn.random}
           settings:
