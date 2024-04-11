@@ -104,7 +104,8 @@ actions:
           deployHookType: js
           undeployHook: ${globals.DEPLOY_HOOK_JS}
           undeployHookType: js
-          _customDomains: ${env.domain}
+          customDomains: ${env.domain}
+          fallbackToX1: true
           
   add-nat-forwarding:
     cmd[${this.ids}]: |-    
