@@ -23,7 +23,7 @@ settings:
     nodeType: dockerengine
     caption: Docker Version
     name: tag  
-    width: 100    
+    width: 165
   - name: mode
     type: radio-fieldset
     values:
