@@ -22,7 +22,7 @@ settings:
     nodeType: dockerengine
     caption: Docker Version
     name: tag  
-    width: 100
+    width: 165
   - type: spinner
     name: mngr
     caption: Manager Nodes
