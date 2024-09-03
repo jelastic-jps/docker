@@ -36,7 +36,7 @@ settings:
       - name: repo
         type: string
         caption: Compose Repo
-        default: https://github.com/vegasbrianc/docker-compose-demo.git
+        default: https://github.com/virtuozzo/docker-compose-demo/docker-compose-demo.git
         required: true
         vtype: url
       - name: role
