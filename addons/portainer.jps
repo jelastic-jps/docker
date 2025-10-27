@@ -18,7 +18,7 @@ globals:
   CERTS: ~/.ssh/certs
   DEPLOY_HOOK: /var/lib/jelastic/keys/letsencrypt/deployLE.sh
   UNDEPLOY_HOOK: /var/lib/jelastic/keys/letsencrypt/undeployLE.sh 
-  DEPLOY_HOOK_JS: https://raw.githubusercontent.com/jelastic-jps/docker/master/addons/le-ssl-deploy-hook.js?_r=${fn.random}    
+  DEPLOY_HOOK_JS: https://cdn.jsdelivr.net/gh/jelastic-jps/docker@master/addons/le-ssl-deploy-hook.js?_r=${fn.random}    
   
 onInstall:
   - generateKeys: ${nodes.cp.master.id}
@@ -100,7 +100,7 @@ actions:
 
 
     - install:
-        jps: https://raw.githubusercontent.com/jelastic-jps/lets-encrypt/master/manifest.jps?_r=${fn.random}
+        jps: https://cdn.jsdelivr.net/gh/jelastic-jps/lets-encrypt@master/manifest.jps?_r=${fn.random}
         nodeGroup: cp
         settings:
           deployHook: ${globals.DEPLOY_HOOK_JS}
