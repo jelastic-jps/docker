@@ -1,4 +1,4 @@
-jps: https://github.com/jelastic-jps/docker/blob/master/docker-engine/manifest.jps
+jps: https://cdn.jsdelivr.net/gh/jelastic-jps/docker@master/docker-engine/manifest.jps
 component: docker-ce
 subfolders: 
   - docker-engine

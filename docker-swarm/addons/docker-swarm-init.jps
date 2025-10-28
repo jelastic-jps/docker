@@ -1,7 +1,7 @@
 type: update
 id: docker-swarm-init
 name: Docker Swarm Init
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/docker/master/docker-swarm/addons
+baseUrl: https://cdn.jsdelivr.net/gh/jelastic-jps/docker@master/docker-swarm/addons
 onInstall:
   #blocking requests to the old swarm
   - if (${settings.clone:false}):

@@ -84,4 +84,3 @@ Before installing the package, please consider the following points:
 
 * The chosen Platform should run Jelastic of [5.2 version or later](https://jelastic.cloud/?versions=5.3_5.2) and contain environment region(s) with native Docker container support enabled (their presence and names could be found within the same-named column of the [Jelastic Hosting Providers](https://docs.jelastic.com/jelastic-hoster-info) list).
 * The included option of [Public IP](http://docs.jelastic.com/public-ipv4) attachment is provided for billing users only.
-

@@ -1,7 +1,7 @@
 type: install
 id: docker-swarm-ce
 version: 1.7
-baseUrl: https://raw.githubusercontent.com/jelastic-jps/docker/master/docker-swarm
+baseUrl: https://cdn.jsdelivr.net/gh/jelastic-jps/docker@master/docker-swarm
 description:
   text: /text/description.md
   short: Docker Swarm Cluster with out-of-box auto-clustering and auto-scaling
@@ -91,7 +91,7 @@ settings:
         - name: yml
           type: string
           caption: Stack YML URL
-          default: https://github.com/jelastic/example-voting-app/blob/master/docker-stack.yml
+          default: https://cdn.jsdelivr.net/gh/jelastic/example-voting-app@master/docker-stack.yml
           required: true
           vtype: url
         - name: stackName
