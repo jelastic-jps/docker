@@ -1,14 +1,14 @@
 type: install
 id: docker-engine-ce
 version: 1.7
-baseUrl: https://cdn.jsdelivr.net/gh/jelastic-jps/docker@master/docker-engine/
+baseUrl: https://cdn.jsdelivr.net/gh/jelastic-jps/docker@master
 description:
-  text: /text/description.md
+  text: /docker-engine/text/description.md
   short: Automatic Installation of Docker Engine (CE) as a Standalone or Worker Node
 categories:
   - apps/dev-and-admin-tools
 
-logo: ../images/docker-engine-logo-2.png
+logo: /images/docker-engine-logo-2.png
 name: Docker Engine CE
 targetRegions:
   type: vz7
@@ -98,7 +98,7 @@ actions:
   deploy:
     if ('${settings.mode}' == 'deploy'):
       install:
-        jps: ../addons/docker-deploy.jps
+        jps: /addons/docker-deploy.jps
         settings:
           repo: ${settings.repo}
           type: compose
@@ -128,7 +128,7 @@ actions:
   portainer:
     if ('${settings.portainer}' == 'true'):
       - install:
-          jps: ../addons/portainer.jps?_r=${fn.random}
+          jps: /addons/portainer.jps?_r=${fn.random}
           settings:
             mode: engine
             port: ${globals.port}
@@ -137,7 +137,7 @@ actions:
 
   addExtIp:
     if ('${settings.role}' == 'cp'):
-      script: ../addons/scripts/attach-external-ip.js?_r=${fn.random}
+      script: /addons/scripts/attach-external-ip.js?_r=${fn.random}
 
 startPage: ${globals.startPage}
  
