@@ -1,14 +1,14 @@
 type: install
 id: docker-swarm-ce
 version: 1.7
-baseUrl: https://cdn.jsdelivr.net/gh/jelastic-jps/docker@master/docker-swarm
+baseUrl: https://cdn.jsdelivr.net/gh/jelastic-jps/docker@master
 description:
-  text: /text/description.md
+  text: /docker-swarm/text/description.md
   short: Docker Swarm Cluster with out-of-box auto-clustering and auto-scaling
 categories:
   - apps/clusters
   - apps/dev-and-admin-tools
-logo: ../images/docker-swarm-logo-89x70.png
+logo: /images/docker-swarm-logo-89x70.png
 name: Docker Swarm Cluster
 targetRegions:
   type: vz7
@@ -144,7 +144,7 @@ skipNodeEmails: true
  
 onInstall:
   - addExtIp
-  - install: /addons/docker-swarm-init.jps?_r=${fn.random}
+  - install: /docker-swarm/addons/docker-swarm-init.jps?_r=${fn.random}
   - if ('${settings.stack}' == 'deploy'): deploy
   - portainer
   - get-tokens
@@ -155,7 +155,7 @@ onInstall:
 actions:
   deploy:
     - install:
-        jps: ../addons/docker-deploy.jps?_r=${fn.random}
+        jps: /addons/docker-deploy.jps?_r=${fn.random}
         settings:
           yml: ${settings.yml}
           stackName: ${settings.stackName}
@@ -173,7 +173,7 @@ actions:
   portainer:
     if ('${settings.portainer}' == 'true'):
       - install:
-          jps: ../addons/portainer.jps?_r=${fn.random}
+          jps: /addons/portainer.jps?_r=${fn.random}
           settings:
             mode: swarm
             port: ${globals.port}
@@ -181,7 +181,7 @@ actions:
           startPage: https://${env.domain}:${globals.port}/
 
   addExtIp:
-    script: ../addons/scripts/attach-external-ip.js?_r=${fn.random}
+    script: /addons/scripts/attach-external-ip.js?_r=${fn.random}
 
   get-tokens: 
     - cmd[${nodes.cp.master.id}]: docker swarm join-token -q manager
